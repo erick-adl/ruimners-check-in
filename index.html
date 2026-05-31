@@ -479,7 +479,7 @@
     <script type="module">
         // 1. Importações do Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy, setDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
 
         // 2. Configuração copiada do seu painel
@@ -502,7 +502,6 @@
         // ==========================================
         //  CONFIGURAÇÃO DO ADMINISTRADOR
         // ==========================================
-        const ADMIN_EMAIL = "erick.adlima@gmail.com"; // <-- MUDE PARA O SEU E-MAIL DO GOOGLE AQUI
         // ==========================================
 
         // Elementos da Interface
@@ -630,27 +629,35 @@
         });
 
         // ==========================================
-        //  LOGIN E EDIÇÃO DO ADMIN
+        //  LOGIN E EDIÇÃO DO ADMIN (VERSÃO 2 - FIRESTORE)
         // ==========================================
-        btnAdminLogin.addEventListener('click', () => {
-            const user = auth.currentUser;
+        btnAdminLogin.addEventListener('click', async () => {
+            let user = auth.currentUser;
 
-            // Se não está logado, chama o Google
+            // Se não está logado, chama a janela do Google
             if (!user) {
-                signInWithPopup(auth, provider).then((result) => {
-                    if (result.user.email === ADMIN_EMAIL) {
-                        abrirModalAdmin();
-                    } else {
-                        alert("Acesso Negado: Apenas o administrador pode editar o desafio.");
-                    }
-                }).catch((error) => console.error(error));
-            } else {
-                // Se já está logado
-                if (user.email === ADMIN_EMAIL) {
-                    abrirModalAdmin();
-                } else {
-                    alert("Acesso Negado: Apenas o administrador pode editar o desafio.");
+                try {
+                    const result = await signInWithPopup(auth, provider);
+                    user = result.user; // Guarda os dados de quem acabou de logar
+                } catch (error) {
+                    console.error("Erro no login:", error);
+                    return; // Aborta se o usuário fechar a janela
                 }
+            }
+
+            // Vai no banco de dados, na coleção 'admins', e procura um documento com o ID igual ao e-mail
+            try {
+                const adminDoc = await getDoc(doc(db, "admins", user.email));
+
+                if (adminDoc.exists()) {
+                    abrirModalAdmin(); // Achei o documento! Pode abrir a janela de edição.
+                } else {
+                    // Não achei o documento, mostra alerta e nega o acesso.
+                    alert(`Acesso Negado: O e-mail ${user.email} não tem permissão de administrador.`);
+                }
+            } catch (error) {
+                console.error("Erro ao verificar permissão:", error);
+                alert("Erro ao verificar as permissões no banco de dados.");
             }
         });
 
