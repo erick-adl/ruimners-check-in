@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ruímners - Check-in</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-color: #050505;
+            --card-bg: #111111;
+            --neon: #D4FF00;
+            --text-main: #FFFFFF;
+            --text-muted: #A0A0A0;
+            --border-color: #2A2A2A;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px 15px;
+            position: relative;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 450px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Botão do Admin no topo */
+        .admin-top-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: transparent;
+            color: var(--text-muted);
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: color 0.2s;
+            z-index: 100;
+        }
+
+        .admin-top-btn:hover {
+            color: var(--neon);
+        }
+
+        /* Cabecalho / Logo */
+        .header {
+            text-align: center;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        .logo {
+            font-family: 'Oswald', sans-serif;
+            font-size: 3.5rem;
+            font-style: italic;
+            line-height: 1;
+            letter-spacing: -1px;
+            text-transform: uppercase;
+        }
+
+        .logo .neon-text {
+            color: var(--neon);
+        }
+
+        .logo .white-text {
+            color: var(--text-main);
+        }
+
+        .subtitle {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.2rem;
+            font-style: italic;
+            color: var(--neon);
+            letter-spacing: 1px;
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .subtitle .white-dash {
+            color: var(--text-main);
+        }
+
+        /* Cartões Comuns */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Cartão de Desafio */
+        .challenge-title {
+            color: var(--neon);
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+            justify-content: space-between;
+        }
+
+        .challenge-text {
+            color: #E0E0E0;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* Título de Seção */
+        .section-title {
+            font-family: 'Oswald', sans-serif;
+            font-style: italic;
+            text-align: center;
+            font-size: 2rem;
+            color: var(--text-main);
+            text-transform: uppercase;
+            margin: 10px 0;
+        }
+
+        /* Cartão de Input */
+        .checkin-card {
+            border: 1px solid var(--neon);
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            color: var(--neon);
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.1rem;
+            letter-spacing: 0.5px;
+        }
+
+        .input-group input {
+            background-color: #1A1A1A;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: var(--text-main);
+            padding: 16px;
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-group input:focus {
+            border-color: var(--neon);
+        }
+
+        .btn-confirm {
+            width: 100%;
+            background-color: var(--neon);
+            color: #000000;
+            border: none;
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            transition: opacity 0.2s;
+        }
+
+        .btn-confirm:active {
+            opacity: 0.8;
+        }
+
+        /* Cartão da Lista */
+        .list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .list-title {
+            color: var(--neon);
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .badge {
+            background-color: #1A1A1A;
+            color: var(--neon);
+            border: 1px solid var(--neon);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .athlete-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .athlete-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #1F1F1F;
+        }
+
+        .athlete-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .athlete-icon {
+            color: var(--neon);
+            font-size: 1.2rem;
+            background: #1A1A1A;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            border: 1px solid #333;
+        }
+
+        .athlete-name {
+            flex: 1;
+            font-size: 0.95rem;
+            color: #E0E0E0;
+        }
+
+        .athlete-time {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .check-icon {
+            color: var(--neon);
+            font-size: 1.1rem;
+        }
+
+        .delete-icon {
+            color: #ff4d4d;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-left: 12px;
+            transition: transform 0.2s, color 0.2s;
+            padding: 4px;
+        }
+
+        .delete-icon:hover {
+            color: #ff3333;
+            transform: scale(1.15);
+        }
+
+        .list-footer {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            margin-top: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Estilos dos Modais */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .modal-card {
+            width: 100%;
+            max-width: 350px;
+            text-align: center;
+        }
+
+        .modal-title {
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .modal-text {
+            color: #E0E0E0;
+            margin-bottom: 25px;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .btn-cancel {
+            background-color: transparent;
+            color: var(--text-main);
+            border: 1px solid var(--text-muted);
+            padding: 12px 0;
+            border-radius: 8px;
+            font-family: 'Oswald', sans-serif;
+            font-size: 1rem;
+            cursor: pointer;
+            flex: 1;
+            transition: background 0.2s;
+        }
+
+        .btn-cancel:hover {
+            background-color: #222;
+        }
+
+        .btn-danger {
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 12px 0;
+            border-radius: 8px;
+            font-family: 'Oswald', sans-serif;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            flex: 1;
+            transition: opacity 0.2s;
+        }
+
+        .btn-danger:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+
+<body>
+
+    <button id="btn-admin-login" class="admin-top-btn" title="Acesso Restrito ao Admin">
+        <i class="fa-solid fa-lock"></i>
+    </button>
+
+    <div class="container">
+
+        <header class="header">
+            <h1 class="logo">
+                <span class="neon-text">RUÍM</span><span class="white-text">NERS</span>
+            </h1>
+            <div class="subtitle">
+                +VONTADE <span class="white-dash">-</span> DESCULPA
+            </div>
+        </header>
+
+        <section class="card">
+            <h2 class="challenge-title">
+                <span><i class="fa-solid fa-bullhorn"></i> PRÓXIMO DESAFIO</span>
+            </h2>
+            <div class="challenge-text" id="challenge-display">
+                <p>Carregando desafio...</p>
+            </div>
+        </section>
+
+        <h2 class="section-title">CHECK-IN</h2>
+
+        <section class="card checkin-card">
+            <div class="input-group">
+                <label for="atleta-input">ATLETA</label>
+                <input type="text" id="atleta-input" placeholder="Digite seu nome">
+            </div>
+            <button id="btn-confirmar" class="btn-confirm">
+                <i class="fa-regular fa-circle-check"></i> CONFIRMAR PRESENÇA
+            </button>
+        </section>
+
+        <section class="card">
+            <div class="list-header">
+                <div class="list-title">
+                    <i class="fa-solid fa-user-group"></i> ATLETAS CONFIRMADOS
+                </div>
+                <div class="badge" id="contador-atletas">0</div>
+            </div>
+
+            <div class="athlete-list" id="lista-checkin">
+            </div>
+
+            <div class="list-footer">
+                <i class="fa-solid fa-satellite-dish"></i> ATUALIZAÇÃO EM TEMPO REAL
+            </div>
+        </section>
+
+    </div>
+
+    <div id="delete-modal" class="modal-overlay hidden">
+        <div class="card modal-card" style="border-color: #ff4d4d;">
+            <h3 class="modal-title" style="color: #ff4d4d;"><i class="fa-solid fa-triangle-exclamation"></i> REMOVER
+                ATLETA</h3>
+            <p class="modal-text">Tem certeza que deseja remover <strong id="modal-athlete-name"
+                    class="neon-text"></strong> do check-in?</p>
+            <div class="modal-actions">
+                <button id="btn-cancel-delete" class="btn-cancel">CANCELAR</button>
+                <button id="btn-confirm-delete" class="btn-danger">REMOVER</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="edit-challenge-modal" class="modal-overlay hidden">
+        <div class="card modal-card" style="border-color: var(--neon); max-width: 400px;">
+            <h3 class="modal-title" style="color: var(--neon);">
+                <i class="fa-solid fa-pen-to-square"></i> EDITAR DESAFIO
+            </h3>
+            <div class="input-group" style="text-align: left;">
+                <label>Texto do Desafio (Use 'Enter' para pular linha)</label>
+                <textarea id="edit-challenge-text" rows="8"
+                    style="width: 100%; background-color: #1A1A1A; border: 1px solid #333; border-radius: 8px; color: white; padding: 10px; font-family: 'Inter', sans-serif; resize: none;"></textarea>
+            </div>
+            <div class="modal-actions" style="margin-top: 20px;">
+                <button id="btn-cancel-edit" class="btn-cancel">CANCELAR</button>
+                <button id="btn-save-challenge" class="btn-confirm" style="flex: 1; padding: 12px 0;">SALVAR</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // 1. Importações do Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy, setDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+
+        // 2. Configuração copiada do seu painel
+        const firebaseConfig = {
+            apiKey: "AIzaSyDjoyE7GUNrwvo_5LflUn-1Go4ovHisAKk",
+            authDomain: "ruimners-check-in.firebaseapp.com",
+            projectId: "ruimners-check-in",
+            storageBucket: "ruimners-check-in.firebasestorage.app",
+            messagingSenderId: "365417570993",
+            appId: "1:365417570993:web:e9bcf54620da866ea8f890",
+            measurementId: "G-BYFKQFQ24G"
+        };
+
+        // 3. Inicialização
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        // ==========================================
+        //  CONFIGURAÇÃO DO ADMINISTRADOR
+        // ==========================================
+        const ADMIN_EMAIL = "erick.adlima@gmail.com"; // <-- MUDE PARA O SEU E-MAIL DO GOOGLE AQUI
+        // ==========================================
+
+        // Elementos da Interface
+        const inputAtleta = document.getElementById('atleta-input');
+        const btnConfirmar = document.getElementById('btn-confirmar');
+        const listaCheckin = document.getElementById('lista-checkin');
+        const contadorAtletas = document.getElementById('contador-atletas');
+        const challengeDisplay = document.getElementById('challenge-display');
+
+        // Elementos - Modal Deletar
+        const deleteModal = document.getElementById('delete-modal');
+        const modalAthleteName = document.getElementById('modal-athlete-name');
+        const btnCancelDelete = document.getElementById('btn-cancel-delete');
+        const btnConfirmDelete = document.getElementById('btn-confirm-delete');
+        let idParaDeletar = null;
+
+        // Elementos - Admin
+        const btnAdminLogin = document.getElementById('btn-admin-login');
+        const editChallengeModal = document.getElementById('edit-challenge-modal');
+        const editChallengeText = document.getElementById('edit-challenge-text');
+        const btnCancelEdit = document.getElementById('btn-cancel-edit');
+        const btnSaveChallenge = document.getElementById('btn-save-challenge');
+
+        // ==========================================
+        //  SISTEMA DE CHECK-IN (ADICIONAR)
+        // ==========================================
+        async function fazerCheckin() {
+            const nome = inputAtleta.value.trim();
+            if (nome === "") {
+                alert("Por favor, digite seu nome para confirmar presença!");
+                return;
+            }
+
+            const agora = new Date();
+            const horas = String(agora.getHours()).padStart(2, '0');
+            const minutos = String(agora.getMinutes()).padStart(2, '0');
+            const horaFormatada = `${horas}:${minutos}`;
+
+            // Salva no Firestore
+            try {
+                await addDoc(collection(db, "checkins"), {
+                    nome: nome,
+                    hora: horaFormatada,
+                    timestamp: Date.now() // Usado para ordenar a lista
+                });
+                inputAtleta.value = "";
+            } catch (e) {
+                console.error("Erro ao adicionar documento: ", e);
+                alert("Erro ao fazer check-in. Tente novamente.");
+            }
+        }
+
+        btnConfirmar.addEventListener('click', fazerCheckin);
+        inputAtleta.addEventListener('keypress', (e) => { if (e.key === 'Enter') fazerCheckin(); });
+
+        // ==========================================
+        //  LEITURA EM TEMPO REAL (ATLETAS)
+        // ==========================================
+        const qCheckins = query(collection(db, "checkins"), orderBy("timestamp", "asc"));
+        onSnapshot(qCheckins, (snapshot) => {
+            listaCheckin.innerHTML = ""; // Limpa a lista atual
+            let total = 0;
+
+            snapshot.forEach((docSnap) => {
+                const dados = docSnap.data();
+                const id = docSnap.id;
+                total++;
+
+                const atletaDiv = document.createElement('div');
+                atletaDiv.className = 'athlete-item';
+                atletaDiv.innerHTML = `
+                    <div class="athlete-icon"><i class="fa-regular fa-user"></i></div>
+                    <div class="athlete-name">${dados.nome}</div>
+                    <div class="athlete-time">${dados.hora}</div>
+                    <div class="check-icon"><i class="fa-regular fa-circle-check"></i></div>
+                    <div class="delete-icon" title="Remover Check-in"><i class="fa-regular fa-trash-can"></i></div>
+                `;
+
+                // Botão de deletar deste atleta
+                const btnDeletar = atletaDiv.querySelector('.delete-icon');
+                btnDeletar.addEventListener('click', () => {
+                    modalAthleteName.textContent = dados.nome;
+                    idParaDeletar = id; // Guarda o ID do Firestore
+                    deleteModal.classList.remove('hidden');
+                });
+
+                listaCheckin.appendChild(atletaDiv);
+            });
+
+            contadorAtletas.textContent = total;
+        });
+
+        // ==========================================
+        //  REMOÇÃO (DELETAR ATLETA)
+        // ==========================================
+        btnCancelDelete.addEventListener('click', () => {
+            deleteModal.classList.add('hidden');
+            idParaDeletar = null;
+        });
+
+        btnConfirmDelete.addEventListener('click', async () => {
+            if (idParaDeletar) {
+                try {
+                    await deleteDoc(doc(db, "checkins", idParaDeletar));
+                    deleteModal.classList.add('hidden');
+                    idParaDeletar = null;
+                } catch (e) {
+                    console.error("Erro ao deletar: ", e);
+                }
+            }
+        });
+
+        // ==========================================
+        //  SISTEMA DO PRÓXIMO DESAFIO (TEMPO REAL)
+        // ==========================================
+        let textoAtualDesafio = "";
+        onSnapshot(doc(db, "desafios", "atual"), (docSnap) => {
+            if (docSnap.exists()) {
+                textoAtualDesafio = docSnap.data().texto;
+                // Transforma quebras de linha em tags <p> do HTML
+                challengeDisplay.innerHTML = textoAtualDesafio.split('\n').map(linha => `<p>${linha}</p>`).join('');
+            } else {
+                challengeDisplay.innerHTML = "<p>Nenhum desafio cadastrado ainda.</p>";
+            }
+        });
+
+        // ==========================================
+        //  LOGIN E EDIÇÃO DO ADMIN
+        // ==========================================
+        btnAdminLogin.addEventListener('click', () => {
+            const user = auth.currentUser;
+
+            // Se não está logado, chama o Google
+            if (!user) {
+                signInWithPopup(auth, provider).then((result) => {
+                    if (result.user.email === ADMIN_EMAIL) {
+                        abrirModalAdmin();
+                    } else {
+                        alert("Acesso Negado: Apenas o administrador pode editar o desafio.");
+                    }
+                }).catch((error) => console.error(error));
+            } else {
+                // Se já está logado
+                if (user.email === ADMIN_EMAIL) {
+                    abrirModalAdmin();
+                } else {
+                    alert("Acesso Negado: Apenas o administrador pode editar o desafio.");
+                }
+            }
+        });
+
+        function abrirModalAdmin() {
+            editChallengeText.value = textoAtualDesafio; // Preenche com o texto atual
+            editChallengeModal.classList.remove('hidden');
+        }
+
+        btnCancelEdit.addEventListener('click', () => {
+            editChallengeModal.classList.add('hidden');
+        });
+
+        btnSaveChallenge.addEventListener('click', async () => {
+            const novoTexto = editChallengeText.value.trim();
+            if (novoTexto === "") return;
+
+            try {
+                // setDoc cria ou sobrescreve o documento 'atual' na coleção 'desafios'
+                await setDoc(doc(db, "desafios", "atual"), { texto: novoTexto });
+                editChallengeModal.classList.add('hidden');
+            } catch (e) {
+                console.error("Erro ao salvar desafio:", e);
+                alert("Erro ao salvar. Verifique se o Firestore está em Modo Teste.");
+            }
+        });
+
+    </script>
+</body>
+
+</html>
