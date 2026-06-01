@@ -69,17 +69,20 @@
         .header {
             text-align: center;
             margin-top: 10px;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
         }
 
-        .logo {
-            font-family: 'Oswald', sans-serif;
-            font-size: 3.5rem;
-            font-style: italic;
-            line-height: 1;
-            letter-spacing: -1px;
-            text-transform: uppercase;
+        .logo-img {
+            max-width: 100%;
+            /* Garante que não vaze da tela */
+            width: 320px;
+            /* Tamanho ideal, mas você pode aumentar ou diminuir */
+            height: auto;
+            margin: 0 auto;
+            display: block;
         }
+
+
 
         .logo .neon-text {
             color: var(--neon);
@@ -89,18 +92,7 @@
             color: var(--text-main);
         }
 
-        .subtitle {
-            font-family: 'Oswald', sans-serif;
-            font-size: 1.2rem;
-            font-style: italic;
-            color: var(--neon);
-            letter-spacing: 1px;
-            margin-top: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-        }
+
 
         .subtitle .white-dash {
             color: var(--text-main);
@@ -399,12 +391,7 @@
     <div class="container">
 
         <header class="header">
-            <h1 class="logo">
-                <span class="neon-text">RUÍM</span><span class="white-text">NERS</span>
-            </h1>
-            <div class="subtitle">
-                +VONTADE <span class="white-dash">-</span> DESCULPA
-            </div>
+            <img src="logo.png" alt="Ruímners: + Vontade - Desculpa" class="logo-img">
         </header>
 
         <section class="card">
