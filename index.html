@@ -5,6 +5,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ruímners - Check-in</title>
+    <!-- Configurações para o Card de Compartilhamento (WhatsApp / Redes Sociais) -->
+    <meta property="og:title" content="Ruímners - Check-in">
+    <meta property="og:description" content="+VONTADE — DESCULPA. Confirme sua presença no próximo desafio!">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://erick-adl.github.io/ruimners-check-in/">
+
+    <!-- LINK ABSOLUTO DA SUA LOGO -->
+    <meta property="og:image" content="https://erick-adl.github.io/ruimners-check-in/logo.png">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -516,11 +527,16 @@
         //  SISTEMA DE CHECK-IN (ADICIONAR)
         // ==========================================
         async function fazerCheckin() {
-            const nome = inputAtleta.value.trim();
+            let nome = inputAtleta.value.trim();
             if (nome === "") {
                 alert("Por favor, digite seu nome para confirmar presença!");
                 return;
             }
+
+            // MÁGICA DA FORMATAÇÃO: Transforma a primeira letra de cada palavra em Maiúscula
+            nome = nome.split(' ')
+                .map(palavra => palavra.charAt(0).toUpperCase() + palavra.slice(1).toLowerCase())
+                .join(' ');
 
             const agora = new Date();
             const horas = String(agora.getHours()).padStart(2, '0');
