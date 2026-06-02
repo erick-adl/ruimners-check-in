@@ -17,6 +17,9 @@
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
 
+    <!-- Biblioteca para transformar HTML em Imagem -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@700&display=swap"
@@ -426,11 +429,17 @@
             </button>
         </section>
 
-        <section class="card">
+        <section class="card" id="cardLista">
             <div class="list-header">
+                <!-- TESTE ALTERADO: O ícone agora fica aqui dentro, colado no texto do título -->
                 <div class="list-title">
                     <i class="fa-solid fa-user-group"></i> ATLETAS CONFIRMADOS
+                    <button id="btnCompartilharFoto" title="Compartilhar lista como imagem"
+                        style="background: none; border: none; color: var(--text-muted); font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; padding: 0 4px; transition: transform 0.2s, color 0.2s; outline: none;">
+                        <i class="fa-solid fa-share-nodes"></i>
+                    </button>
                 </div>
+                <!-- O contador continua isolado no lado direito -->
                 <div class="badge" id="contador-atletas">0</div>
             </div>
 
@@ -684,6 +693,60 @@
             } catch (e) {
                 console.error("Erro ao salvar desafio:", e);
                 alert("Erro ao salvar. Verifique se o Firestore está em Modo Teste.");
+            }
+        });
+
+        // ==========================================
+        //  COMPARTILHAR LISTA COMO IMAGEM
+        // ==========================================
+        const btnCompartilharFoto = document.getElementById('btnCompartilharFoto');
+
+        btnCompartilharFoto.addEventListener('click', async () => {
+            const elementoParaFotografar = document.getElementById('cardLista');
+
+            if (!elementoParaFotografar) {
+                alert("Erro: Não foi possível encontrar a lista para gerar a imagem.");
+                return;
+            }
+
+            // Pequeno efeito visual de clique
+            btnCompartilharFoto.style.transform = "scale(0.85)";
+
+            try {
+                // Tira a "foto" do elemento HTML
+                const canvas = await html2canvas(elementoParaFotografar, {
+                    backgroundColor: '#111111', // Mantém o fundo cinza escuro do seu card
+                    useCORS: true,              // Evita problemas de carregamento de fontes do Google
+                    scale: 2                     // Melhora a resolução da imagem para não ficar borrada
+                });
+
+                // Transforma o resultado em um arquivo de imagem real (Blob)
+                canvas.toBlob(async (blob) => {
+                    const arquivo = new File([blob], 'lista-ruimners.png', { type: 'image/png' });
+
+                    // Verifica se o celular aceita o compartilhamento de arquivos nativo
+                    if (navigator.canShare && navigator.canShare({ files: [arquivo] })) {
+                        await navigator.share({
+                            files: [arquivo],
+                            title: 'Lista de Presença Ruímners',
+                            text: 'Confira quem já confirmou presença para o próximo treino! 🏃‍♂️💨'
+                        });
+                    } else {
+                        // Caso acesse pelo computador ou navegador antigo, faz o download automático como plano B
+                        const link = document.createElement('a');
+                        link.download = 'lista-ruimners.png';
+                        link.href = canvas.toDataURL();
+                        link.click();
+                        alert("Seu navegador não suporta o envio direto. Baixamos a imagem da lista para você enviar manualmente!");
+                    }
+
+                    btnCompartilharFoto.style.transform = "scale(1)";
+                }, 'image/png');
+
+            } catch (error) {
+                console.error("Erro ao gerar imagem:", error);
+                alert("Não foi possível gerar a imagem da lista.");
+                btnCompartilharFoto.style.transform = "scale(1)";
             }
         });
 
