@@ -5,19 +5,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ruímners - Check-in</title>
-    <!-- Configurações para o Card de Compartilhamento (WhatsApp / Redes Sociais) -->
     <meta property="og:title" content="Ruimners - Check-in">
     <meta property="og:description" content="+VONTADE — DESCULPA. Confirme sua presença no próximo desafio!">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://erick-adl.github.io/ruimners-check-in/">
 
-    <!-- LINK ABSOLUTO DA SUA LOGO -->
     <meta property="og:image" content="https://erick-adl.github.io/ruimners-check-in/logo_bg.jpg">
     <meta property="og:image:type" content="image/jpeg">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
 
-    <!-- Biblioteca para transformar HTML em Imagem -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -88,28 +85,10 @@
 
         .logo-img {
             max-width: 100%;
-            /* Garante que não vaze da tela */
             width: 320px;
-            /* Tamanho ideal, mas você pode aumentar ou diminuir */
             height: auto;
             margin: 0 auto;
             display: block;
-        }
-
-
-
-        .logo .neon-text {
-            color: var(--neon);
-        }
-
-        .logo .white-text {
-            color: var(--text-main);
-        }
-
-
-
-        .subtitle .white-dash {
-            color: var(--text-main);
         }
 
         /* Cartões Comuns */
@@ -141,6 +120,59 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
+        }
+
+        /* Card de Localização Simplificado */
+        .location-card {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .location-title {
+            color: var(--neon);
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.3rem;
+            font-style: italic;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .map-box {
+            width: 100%;
+            height: 180px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Filtro inteligente para emular mapa escuro/neon */
+        .map-box iframe {
+            width: 100%;
+            height: 100%;
+            border: 0;
+            filter: invert(90%) hue-rotate(180deg) brightness(95%) contrast(90%);
+        }
+
+        .info-block {
+            border-left: 3px solid var(--neon);
+            padding-left: 12px;
+        }
+
+        .info-block h4 {
+            font-family: 'Oswald', sans-serif;
+            color: var(--neon);
+            font-size: 1rem;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        .info-block p {
+            color: #E0E0E0;
+            font-size: 0.9rem;
+            line-height: 1.4;
         }
 
         /* Título de Seção */
@@ -408,6 +440,7 @@
             <img src="logo.png" alt="Ruímners: + Vontade - Desculpa" class="logo-img">
         </header>
 
+        <!-- DESAFIO -->
         <section class="card">
             <h2 class="challenge-title">
                 <span><i class="fa-solid fa-bullhorn"></i> PRÓXIMO DESAFIO</span>
@@ -419,6 +452,7 @@
 
         <h2 class="section-title">CHECK-IN</h2>
 
+        <!-- FORMULÁRIO -->
         <section class="card checkin-card">
             <div class="input-group">
                 <label for="atleta-input">ATLETA</label>
@@ -429,9 +463,9 @@
             </button>
         </section>
 
+        <!-- LISTA -->
         <section class="card" id="cardLista">
             <div class="list-header">
-                <!-- TESTE ALTERADO: O ícone agora fica aqui dentro, colado no texto do título -->
                 <div class="list-title">
                     <i class="fa-solid fa-user-group"></i> ATLETAS CONFIRMADOS
                     <button id="btnCompartilharFoto" title="Compartilhar lista como imagem"
@@ -439,7 +473,6 @@
                         <i class="fa-solid fa-share-nodes"></i>
                     </button>
                 </div>
-                <!-- O contador continua isolado no lado direito -->
                 <div class="badge" id="contador-atletas">0</div>
             </div>
 
@@ -451,8 +484,29 @@
             </div>
         </section>
 
+        <!-- MAPA NO FINAL E SIMPLIFICADO -->
+        <section class="card location-card">
+            <h2 class="location-title">
+                <i class="fa-solid fa-map-location-dot"></i> ONDE OS RUIMNERS SE ENCONTRAM!
+            </h2>
+
+            <div class="map-box">
+                <iframe src="https://maps.google.com/maps?q=-29.9112326,-51.0225958&z=16&output=embed"
+                    allowfullscreen="" loading="lazy">
+                </iframe>
+            </div>
+
+            <div class="location-info">
+                <div class="info-block">
+                    <h4>PONTO DE ENCONTRO</h4>
+                    <p>Av. Paraná, 451 - Neópolis, Gravataí - RS, 94155-480</p>
+                </div>
+            </div>
+        </section>
+
     </div>
 
+    <!-- MODAIS -->
     <div id="delete-modal" class="modal-overlay hidden">
         <div class="card modal-card" style="border-color: #ff4d4d;">
             <h3 class="modal-title" style="color: #ff4d4d;"><i class="fa-solid fa-triangle-exclamation"></i> REMOVER
@@ -483,13 +537,12 @@
         </div>
     </div>
 
+    <!-- FIREBASE SCRIPT -->
     <script type="module">
-        // 1. Importações do Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
 
-        // 2. Configuração copiada do seu painel
         const firebaseConfig = {
             apiKey: "AIzaSyDjoyE7GUNrwvo_5LflUn-1Go4ovHisAKk",
             authDomain: "ruimners-check-in.firebaseapp.com",
@@ -500,41 +553,30 @@
             measurementId: "G-BYFKQFQ24G"
         };
 
-        // 3. Inicialização
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
         const provider = new GoogleAuthProvider();
 
-        // ==========================================
-        //  CONFIGURAÇÃO DO ADMINISTRADOR
-        // ==========================================
-        // ==========================================
-
-        // Elementos da Interface
         const inputAtleta = document.getElementById('atleta-input');
         const btnConfirmar = document.getElementById('btn-confirmar');
         const listaCheckin = document.getElementById('lista-checkin');
         const contadorAtletas = document.getElementById('contador-atletas');
         const challengeDisplay = document.getElementById('challenge-display');
 
-        // Elementos - Modal Deletar
         const deleteModal = document.getElementById('delete-modal');
         const modalAthleteName = document.getElementById('modal-athlete-name');
         const btnCancelDelete = document.getElementById('btn-cancel-delete');
         const btnConfirmDelete = document.getElementById('btn-confirm-delete');
         let idParaDeletar = null;
 
-        // Elementos - Admin
         const btnAdminLogin = document.getElementById('btn-admin-login');
         const editChallengeModal = document.getElementById('edit-challenge-modal');
         const editChallengeText = document.getElementById('edit-challenge-text');
         const btnCancelEdit = document.getElementById('btn-cancel-edit');
         const btnSaveChallenge = document.getElementById('btn-save-challenge');
 
-        // ==========================================
-        //  SISTEMA DE CHECK-IN (ADICIONAR)
-        // ==========================================
+        // ADICIONAR CHECK-IN
         async function fazerCheckin() {
             let nome = inputAtleta.value.trim();
             if (nome === "") {
@@ -542,7 +584,6 @@
                 return;
             }
 
-            // MÁGICA DA FORMATAÇÃO: Transforma a primeira letra de cada palavra em Maiúscula
             nome = nome.split(' ')
                 .map(palavra => palavra.charAt(0).toUpperCase() + palavra.slice(1).toLowerCase())
                 .join(' ');
@@ -552,12 +593,11 @@
             const minutos = String(agora.getMinutes()).padStart(2, '0');
             const horaFormatada = `${horas}:${minutos}`;
 
-            // Salva no Firestore
             try {
                 await addDoc(collection(db, "checkins"), {
                     nome: nome,
                     hora: horaFormatada,
-                    timestamp: Date.now() // Usado para ordenar a lista
+                    timestamp: Date.now()
                 });
                 inputAtleta.value = "";
             } catch (e) {
@@ -569,12 +609,10 @@
         btnConfirmar.addEventListener('click', fazerCheckin);
         inputAtleta.addEventListener('keypress', (e) => { if (e.key === 'Enter') fazerCheckin(); });
 
-        // ==========================================
-        //  LEITURA EM TEMPO REAL (ATLETAS)
-        // ==========================================
+        // LEITURA EM TEMPO REAL (LISTA)
         const qCheckins = query(collection(db, "checkins"), orderBy("timestamp", "asc"));
         onSnapshot(qCheckins, (snapshot) => {
-            listaCheckin.innerHTML = ""; // Limpa a lista atual
+            listaCheckin.innerHTML = "";
             let total = 0;
 
             snapshot.forEach((docSnap) => {
@@ -592,11 +630,10 @@
                     <div class="delete-icon" title="Remover Check-in"><i class="fa-regular fa-trash-can"></i></div>
                 `;
 
-                // Botão de deletar deste atleta
                 const btnDeletar = atletaDiv.querySelector('.delete-icon');
                 btnDeletar.addEventListener('click', () => {
                     modalAthleteName.textContent = dados.nome;
-                    idParaDeletar = id; // Guarda o ID do Firestore
+                    idParaDeletar = id;
                     deleteModal.classList.remove('hidden');
                 });
 
@@ -606,9 +643,7 @@
             contadorAtletas.textContent = total;
         });
 
-        // ==========================================
-        //  REMOÇÃO (DELETAR ATLETA)
-        // ==========================================
+        // DELETAR ATLETA
         btnCancelDelete.addEventListener('click', () => {
             deleteModal.classList.add('hidden');
             idParaDeletar = null;
@@ -626,45 +661,36 @@
             }
         });
 
-        // ==========================================
-        //  SISTEMA DO PRÓXIMO DESAFIO (TEMPO REAL)
-        // ==========================================
+        // DESAFIO EM TEMPO REAL
         let textoAtualDesafio = "";
         onSnapshot(doc(db, "desafios", "atual"), (docSnap) => {
             if (docSnap.exists()) {
                 textoAtualDesafio = docSnap.data().texto;
-                // Transforma quebras de linha em tags <p> do HTML
                 challengeDisplay.innerHTML = textoAtualDesafio.split('\n').map(linha => `<p>${linha}</p>`).join('');
             } else {
                 challengeDisplay.innerHTML = "<p>Nenhum desafio cadastrado ainda.</p>";
             }
         });
 
-        // ==========================================
-        //  LOGIN E EDIÇÃO DO ADMIN (VERSÃO 2 - FIRESTORE)
-        // ==========================================
+        // LOGIN E PERMISSÃO DO ADMIN
         btnAdminLogin.addEventListener('click', async () => {
             let user = auth.currentUser;
 
-            // Se não está logado, chama a janela do Google
             if (!user) {
                 try {
                     const result = await signInWithPopup(auth, provider);
-                    user = result.user; // Guarda os dados de quem acabou de logar
+                    user = result.user;
                 } catch (error) {
                     console.error("Erro no login:", error);
-                    return; // Aborta se o usuário fechar a janela
+                    return;
                 }
             }
 
-            // Vai no banco de dados, na coleção 'admins', e procura um documento com o ID igual ao e-mail
             try {
                 const adminDoc = await getDoc(doc(db, "admins", user.email));
-
                 if (adminDoc.exists()) {
-                    abrirModalAdmin(); // Achei o documento! Pode abrir a janela de edição.
+                    abrirModalAdmin();
                 } else {
-                    // Não achei o documento, mostra alerta e nega o acesso.
                     alert(`Acesso Negado: O e-mail ${user.email} não tem permissão de administrador.`);
                 }
             } catch (error) {
@@ -674,7 +700,7 @@
         });
 
         function abrirModalAdmin() {
-            editChallengeText.value = textoAtualDesafio; // Preenche com o texto atual
+            editChallengeText.value = textoAtualDesafio;
             editChallengeModal.classList.remove('hidden');
         }
 
@@ -687,7 +713,6 @@
             if (novoTexto === "") return;
 
             try {
-                // setDoc cria ou sobrescreve o documento 'atual' na coleção 'desafios'
                 await setDoc(doc(db, "desafios", "atual"), { texto: novoTexto });
                 editChallengeModal.classList.add('hidden');
             } catch (e) {
@@ -696,11 +721,8 @@
             }
         });
 
-        // ==========================================
-        //  COMPARTILHAR LISTA COMO IMAGEM
-        // ==========================================
+        // COMPARTILHAR LISTA COMO IMAGEM
         const btnCompartilharFoto = document.getElementById('btnCompartilharFoto');
-
         btnCompartilharFoto.addEventListener('click', async () => {
             const elementoParaFotografar = document.getElementById('cardLista');
 
@@ -709,22 +731,18 @@
                 return;
             }
 
-            // Pequeno efeito visual de clique
             btnCompartilharFoto.style.transform = "scale(0.85)";
 
             try {
-                // Tira a "foto" do elemento HTML
                 const canvas = await html2canvas(elementoParaFotografar, {
-                    backgroundColor: '#111111', // Mantém o fundo cinza escuro do seu card
-                    useCORS: true,              // Evita problemas de carregamento de fontes do Google
-                    scale: 2                     // Melhora a resolução da imagem para não ficar borrada
+                    backgroundColor: '#111111',
+                    useCORS: true,
+                    scale: 2
                 });
 
-                // Transforma o resultado em um arquivo de imagem real (Blob)
                 canvas.toBlob(async (blob) => {
                     const arquivo = new File([blob], 'lista-ruimners.png', { type: 'image/png' });
 
-                    // Verifica se o celular aceita o compartilhamento de arquivos nativo
                     if (navigator.canShare && navigator.canShare({ files: [arquivo] })) {
                         await navigator.share({
                             files: [arquivo],
@@ -732,14 +750,12 @@
                             text: 'Confira quem já confirmou presença para o próximo treino! 🏃‍♂️💨'
                         });
                     } else {
-                        // Caso acesse pelo computador ou navegador antigo, faz o download automático como plano B
                         const link = document.createElement('a');
                         link.download = 'lista-ruimners.png';
                         link.href = canvas.toDataURL();
                         link.click();
                         alert("Seu navegador não suporta o envio direto. Baixamos a imagem da lista para você enviar manualmente!");
                     }
-
                     btnCompartilharFoto.style.transform = "scale(1)";
                 }, 'image/png');
 
@@ -749,7 +765,6 @@
                 btnCompartilharFoto.style.transform = "scale(1)";
             }
         });
-
     </script>
 </body>
 
