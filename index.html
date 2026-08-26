@@ -332,6 +332,100 @@
             transform: scale(1.15);
         }
 
+        /* Cartão de Parceiros */
+        .partner-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .partner-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #1F1F1F;
+            text-decoration: none;
+            color: inherit;
+            transition: opacity 0.2s;
+        }
+
+        .partner-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .partner-item:active {
+            opacity: 0.7;
+        }
+
+        .partner-avatar-wrap {
+            position: relative;
+            width: 48px;
+            height: 48px;
+            flex-shrink: 0;
+        }
+
+        .partner-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--neon);
+            display: block;
+            background: #1A1A1A;
+        }
+
+        .partner-avatar-fallback {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #1A1A1A;
+            border: 2px solid var(--neon);
+            align-items: center;
+            justify-content: center;
+            color: var(--neon);
+            font-size: 1.1rem;
+        }
+
+        .partner-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .partner-name {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .partner-subtitle {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .partner-chevron {
+            color: var(--neon);
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .partners-thanks {
+            font-family: 'Oswald', sans-serif;
+            font-style: italic;
+            text-align: center;
+            text-transform: uppercase;
+            color: var(--neon);
+            font-size: 1.15rem;
+            line-height: 1.4;
+            margin: 4px 0;
+        }
+
         .list-footer {
             text-align: center;
             color: var(--text-muted);
@@ -507,6 +601,18 @@
                 </div>
             </div>
         </section>
+
+        <!-- PARCEIROS -->
+        <section class="card" id="cardParceiros">
+            <div class="list-header">
+                <div class="list-title">
+                    <i class="fa-solid fa-handshake"></i> NOSSOS PARCEIROS
+                </div>
+            </div>
+            <div class="partner-list" id="lista-parceiros"></div>
+        </section>
+
+        <p class="partners-thanks">OBRIGADO A CADA PARCEIRO QUE ACREDITA NO PROJETO!</p>
 
     </div>
 
@@ -799,6 +905,46 @@
                 btnConfirmClearInline.innerHTML = textoOriginal;
                 btnConfirmClearInline.disabled = false;
             }
+        });
+
+        // ==========================================
+        //  PARCEIROS
+        // ==========================================
+        // Para adicionar/editar um parceiro: preencha nome, subtitulo,
+        // o caminho da imagem do avatar (ex: "parceiros/nome-do-arquivo.jpg")
+        // e, opcionalmente, um link (site/instagram). Enquanto a imagem
+        // não existir no repositório, o avatar cai automaticamente num
+        // ícone de fallback, sem quebrar o layout.
+        const parceiros = [
+            { nome: "Vinicius Staudt", subtitulo: "Assessoria de corrida", avatar: "parceiros/vinicius-staudt.jpg", link: "https://www.instagram.com/vinicius.staudt" },
+            { nome: "Talia Guimaraes", subtitulo: "Nutricionista", avatar: "parceiros/talia-guimaraes.jpg", link: "https://www.instagram.com/nutritaliaguimaraes" },
+            { nome: "Sul Camisetas", subtitulo: "A melhor em uniformes", avatar: "parceiros/sul-camisetas.jpg", link: "https://www.instagram.com/sulcamisetas" },
+            { nome: "Crossfit Gravataí", subtitulo: "1° box de crossfit de Gravataí", avatar: "parceiros/crossfit-gravatai.jpg", link: "https://www.instagram.com/crossfitgravatai" },
+            { nome: "Arte no céu", subtitulo: "Filmagem aérea", avatar: "parceiros/arte-no-ceu.jpg", link: "https://www.instagram.com/arteno_ceu" },
+        ];
+
+        const listaParceiros = document.getElementById('lista-parceiros');
+        parceiros.forEach((p) => {
+            const item = document.createElement(p.link ? 'a' : 'div');
+            item.className = 'partner-item';
+            if (p.link) {
+                item.href = p.link;
+                item.target = '_blank';
+                item.rel = 'noopener';
+            }
+            item.innerHTML = `
+                <div class="partner-avatar-wrap">
+                    <img src="${p.avatar}" alt="${p.nome}" class="partner-avatar"
+                        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="partner-avatar-fallback"><i class="fa-solid fa-handshake"></i></div>
+                </div>
+                <div class="partner-info">
+                    <div class="partner-name">${p.nome}</div>
+                    <div class="partner-subtitle">${p.subtitulo}</div>
+                </div>
+                <i class="fa-solid fa-chevron-right partner-chevron"></i>
+            `;
+            listaParceiros.appendChild(item);
         });
 
         // COMPARTILHAR LISTA COMO IMAGEM
