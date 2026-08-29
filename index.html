@@ -585,23 +585,14 @@
             </h2>
 
             <div class="map-box">
-                <!-- <iframe src="https://maps.google.com/maps?q=-29.938058, -50.998779&z=16&output=embed" allowfullscreen=""
-                    loading="lazy">
-                </iframe> -->
-                <!-- <iframe src="https://maps.google.com/maps?q=-29.9112326,-51.0225958&z=16&output=embed"
-                    allowfullscreen="" loading="lazy">
-                </iframe> -->
-                <iframe src="https://maps.google.com/maps?q=-29.915098, -51.026899&z=16&output=embed"
-                    allowfullscreen="" loading="lazy">
+                <iframe id="mapa-iframe" src="" allowfullscreen="" loading="lazy">
                 </iframe>
             </div>
 
             <div class="location-info">
                 <div class="info-block">
                     <h4>PONTO DE ENCONTRO</h4>
-                    <!-- <p>R. Angelino Loranzi, 155 - Salgado Filho, Gravataí - RS, 94020-040</p> -->
-                    <!-- <p>Av. Paraná, 451 - Neópolis, Gravataí - RS, 94155-480</p> -->
-                    <p>Av. A - Neópolis, Gravataí - RS</p>
+                    <p id="endereco-display">Carregando localização...</p>
                 </div>
             </div>
         </section>
@@ -648,6 +639,25 @@
                 <button id="btn-cancel-edit" class="btn-cancel">CANCELAR</button>
                 <button id="btn-save-challenge" class="btn-confirm" style="flex: 1; padding: 12px 0;">SALVAR</button>
             </div>
+
+            <div style="border-top: 1px solid var(--border-color); margin: 24px 0 20px;"></div>
+
+            <h4 style="color: var(--text-muted); font-family: 'Oswald', sans-serif; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; margin-bottom: 16px; text-align: left;">
+                <i class="fa-solid fa-map-location-dot"></i> LOCALIZAÇÃO (OPCIONAL)
+            </h4>
+            <div class="input-group" style="text-align: left;">
+                <label>Endereço Completo</label>
+                <input type="text" id="edit-endereco" placeholder="Ex: Av. A - Neópolis, Gravataí - RS"
+                    style="width: 100%; background-color: #1A1A1A; border: 1px solid #333; border-radius: 8px; color: white; padding: 10px; font-family: 'Inter', sans-serif;">
+            </div>
+            <div class="input-group" style="text-align: left;">
+                <label>Coordenadas do Mapa (latitude, longitude)</label>
+                <input type="text" id="edit-coords" placeholder="Ex: -29.915098, -51.026899"
+                    style="width: 100%; background-color: #1A1A1A; border: 1px solid #333; border-radius: 8px; color: white; padding: 10px; font-family: 'Inter', sans-serif;">
+            </div>
+            <button id="btn-save-localizacao" class="btn-confirm"
+                style="width: 100%; margin-bottom: 20px; padding: 12px 0;">SALVAR LOCALIZAÇÃO</button>
+
             <button id="btn-zerar-lista" class="btn-danger"
                 style="width: 100%; margin-top: 15px; padding: 12px 0; display: flex; justify-content: center; align-items: center; gap: 10px;">
                 <i class="fa-solid fa-trash-can"></i> ZERAR LISTA DE CHECK-IN
@@ -706,8 +716,14 @@
         const btnAdminLogin = document.getElementById('btn-admin-login');
         const editChallengeModal = document.getElementById('edit-challenge-modal');
         const editChallengeText = document.getElementById('edit-challenge-text');
+        const editEndereco = document.getElementById('edit-endereco');
+        const editCoords = document.getElementById('edit-coords');
         const btnCancelEdit = document.getElementById('btn-cancel-edit');
         const btnSaveChallenge = document.getElementById('btn-save-challenge');
+        const btnSaveLocalizacao = document.getElementById('btn-save-localizacao');
+
+        const mapaIframe = document.getElementById('mapa-iframe');
+        const enderecoDisplay = document.getElementById('endereco-display');
 
         // ADICIONAR CHECK-IN
         async function fazerCheckin() {
@@ -794,15 +810,33 @@
             }
         });
 
-        // DESAFIO EM TEMPO REAL
+        // DESAFIO + LOCALIZAÇÃO EM TEMPO REAL (mesmo documento: desafios/atual)
         let textoAtualDesafio = "";
+        let enderecoAtual = "";
+        let latAtual = "";
+        let lngAtual = "";
         onSnapshot(doc(db, "desafios", "atual"), (docSnap) => {
-            if (docSnap.exists()) {
-                textoAtualDesafio = docSnap.data().texto;
-                challengeDisplay.innerHTML = textoAtualDesafio.split('\n').map(linha => `<p>${linha}</p>`).join('');
-            } else {
-                challengeDisplay.innerHTML = "<p>Nenhum desafio cadastrado ainda.</p>";
-            }
+            const dados = docSnap.exists() ? docSnap.data() : {};
+
+            textoAtualDesafio = dados.texto || "";
+            challengeDisplay.innerHTML = textoAtualDesafio
+                ? textoAtualDesafio.split('\n').map(linha => `<p>${linha}</p>`).join('')
+                : "<p>Nenhum desafio cadastrado ainda.</p>";
+
+            // Enquanto o admin não salvar uma localização própria, mantém o
+            // endereço/coordenadas padrão para não deixar o mapa em branco.
+            enderecoAtual = dados.endereco || "Av. A - Neópolis, Gravataí - RS";
+            latAtual = (dados.lat !== undefined && dados.lat !== null) ? String(dados.lat) : (dados.endereco ? "" : "-29.915098");
+            lngAtual = (dados.lng !== undefined && dados.lng !== null) ? String(dados.lng) : (dados.endereco ? "" : "-51.026899");
+
+            enderecoDisplay.textContent = enderecoAtual;
+
+            // Se houver coordenadas cadastradas, o mapa usa o pino exato (lat,lng).
+            // Caso contrário, cai no fallback de busca por texto do endereço.
+            const consultaMapa = (latAtual !== "" && lngAtual !== "")
+                ? `${latAtual},${lngAtual}`
+                : encodeURIComponent(enderecoAtual);
+            mapaIframe.src = `https://maps.google.com/maps?q=${consultaMapa}&z=16&output=embed`;
         });
 
         // LOGIN E PERMISSÃO DO ADMIN
@@ -834,6 +868,8 @@
 
         function abrirModalAdmin() {
             editChallengeText.value = textoAtualDesafio;
+            editEndereco.value = enderecoAtual;
+            editCoords.value = (latAtual !== "" && lngAtual !== "") ? `${latAtual}, ${lngAtual}` : "";
             editChallengeModal.classList.remove('hidden');
         }
 
@@ -841,16 +877,49 @@
             editChallengeModal.classList.add('hidden');
         });
 
+        // Salva só o texto do desafio (usa merge para não apagar endereço/coordenadas já salvos)
         btnSaveChallenge.addEventListener('click', async () => {
             const novoTexto = editChallengeText.value.trim();
             if (novoTexto === "") return;
 
             try {
-                await setDoc(doc(db, "desafios", "atual"), { texto: novoTexto });
+                await setDoc(doc(db, "desafios", "atual"), { texto: novoTexto }, { merge: true });
                 editChallengeModal.classList.add('hidden');
             } catch (e) {
                 console.error("Erro ao salvar desafio:", e);
                 alert("Erro ao salvar. Verifique se o Firestore está em Modo Teste.");
+            }
+        });
+
+        // Salva só a localização (endereço + coordenadas), como campos do mesmo
+        // documento "desafios/atual" (merge para não apagar o texto do desafio)
+        btnSaveLocalizacao.addEventListener('click', async () => {
+            const novoEndereco = editEndereco.value.trim();
+            const coordsStr = editCoords.value.trim();
+
+            let novaLat = null;
+            let novaLng = null;
+            if (coordsStr !== "") {
+                const partes = coordsStr.split(',').map(p => p.trim());
+                novaLat = partes.length === 2 ? parseFloat(partes[0]) : NaN;
+                novaLng = partes.length === 2 ? parseFloat(partes[1]) : NaN;
+
+                if (isNaN(novaLat) || isNaN(novaLng)) {
+                    alert("Coordenadas inválidas. Use o formato: latitude, longitude (ex: -29.915098, -51.026899).");
+                    return;
+                }
+            }
+
+            try {
+                await setDoc(doc(db, "desafios", "atual"), {
+                    endereco: novoEndereco,
+                    lat: novaLat,
+                    lng: novaLng
+                }, { merge: true });
+                editChallengeModal.classList.add('hidden');
+            } catch (e) {
+                console.error("Erro ao salvar localização:", e);
+                alert("Erro ao salvar localização. Verifique se o Firestore está em Modo Teste.");
             }
         });
 
