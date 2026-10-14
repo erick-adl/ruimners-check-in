@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Ruímners - Painel Admin</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-color: #050505;
+            --card-bg: #111111;
+            --neon: #D4FF00;
+            --text-main: #FFFFFF;
+            --text-muted: #A0A0A0;
+            --border-color: #2A2A2A;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px 15px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 720px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Cabeçalho */
+        .admin-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .admin-header img {
+            width: 140px;
+            height: auto;
+            display: block;
+        }
+
+        .admin-header-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .admin-link {
+            color: var(--text-muted);
+            background: none;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 0.85rem;
+            font-family: 'Inter', sans-serif;
+            text-decoration: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s, border-color 0.2s;
+        }
+
+        .admin-link:hover {
+            color: var(--neon);
+            border-color: var(--neon);
+        }
+
+        .admin-title {
+            font-family: 'Oswald', sans-serif;
+            color: var(--neon);
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Telas de estado (carregando / login / negado) */
+        .estado-card {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 18px;
+            max-width: 420px;
+            width: 100%;
+            margin: 40px auto 0;
+        }
+
+        .estado-card p {
+            color: #E0E0E0;
+            line-height: 1.5;
+        }
+
+        .estado-acoes {
+            display: flex;
+            gap: 12px;
+            width: 100%;
+        }
+
+        /* Abas */
+        .admin-tabs {
+            display: flex;
+            gap: 6px;
+            border-bottom: 1px solid var(--border-color);
+            overflow-x: auto;
+        }
+
+        .admin-tab {
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: var(--text-muted);
+            font-family: 'Oswald', sans-serif;
+            font-size: 1rem;
+            letter-spacing: 0.5px;
+            padding: 10px 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+            transition: color 0.2s, border-color 0.2s;
+        }
+
+        .admin-tab:hover {
+            color: var(--text-main);
+        }
+
+        .admin-tab.active {
+            color: var(--neon);
+            border-bottom-color: var(--neon);
+        }
+
+        /* Formulários */
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            color: var(--neon);
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.05rem;
+            letter-spacing: 0.5px;
+        }
+
+        .input-group input,
+        .input-group textarea {
+            width: 100%;
+            background-color: #1A1A1A;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: var(--text-main);
+            padding: 12px;
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-group textarea {
+            resize: vertical;
+            line-height: 1.5;
+        }
+
+        .input-group input:focus,
+        .input-group textarea:focus {
+            border-color: var(--neon);
+        }
+
+        .input-hint {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        .btn-confirm {
+            width: 100%;
+            background-color: var(--neon);
+            color: #000000;
+            border: none;
+            border-radius: 8px;
+            padding: 14px;
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            transition: opacity 0.2s;
+        }
+
+        .btn-confirm:active {
+            opacity: 0.8;
+        }
+
+        .btn-confirm:disabled,
+        .btn-danger:disabled {
+            opacity: 0.5;
+            cursor: default;
+        }
+
+        .btn-cancel {
+            background-color: transparent;
+            color: var(--text-main);
+            border: 1px solid var(--text-muted);
+            padding: 12px 0;
+            border-radius: 8px;
+            font-family: 'Oswald', sans-serif;
+            font-size: 1rem;
+            cursor: pointer;
+            flex: 1;
+            transition: background 0.2s;
+        }
+
+        .btn-cancel:hover {
+            background-color: #222;
+        }
+
+        .btn-danger {
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 12px 0;
+            border-radius: 8px;
+            font-family: 'Oswald', sans-serif;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            flex: 1;
+            transition: opacity 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-danger:hover {
+            opacity: 0.8;
+        }
+
+        /* Upload de banner */
+        .banner-dropzone {
+            position: relative;
+            border: 1.5px dashed var(--border-color);
+            border-radius: 8px;
+            background-color: #1A1A1A;
+            min-height: 140px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 15px;
+            cursor: pointer;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            transition: border-color 0.2s, background-color 0.2s;
+            overflow: hidden;
+        }
+
+        .banner-dropzone:hover,
+        .banner-dropzone.dragover {
+            border-color: var(--neon);
+            background-color: #1f1f1f;
+        }
+
+        .banner-dropzone-instrucao {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .banner-dropzone-instrucao i {
+            font-size: 1.4rem;
+        }
+
+        .banner-dropzone-preview {
+            width: 100%;
+            max-height: 260px;
+            object-fit: cover;
+            border-radius: 6px;
+            display: block;
+        }
+
+        .banner-remove-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: rgba(10, 10, 10, 0.75);
+            color: #ff4d4d;
+            border: 1px solid #ff4d4d;
+            border-radius: 6px;
+            padding: 4px 10px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .banner-remove-btn:hover {
+            background-color: #ff4d4d;
+            color: #0a0a0a;
+        }
+
+        /* Aba Check-ins */
+        .contador-box {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #1A1A1A;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .contador-box span {
+            color: var(--text-muted);
+            font-family: 'Oswald', sans-serif;
+            letter-spacing: 0.5px;
+        }
+
+        .contador-box strong {
+            color: var(--neon);
+            font-family: 'Oswald', sans-serif;
+            font-size: 1.8rem;
+        }
+
+        .confirmacao-zerar {
+            margin-top: 15px;
+            background-color: #1a0000;
+            border: 1px solid #ff4d4d;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .confirmacao-zerar p {
+            color: #ff4d4d;
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .confirmacao-zerar .estado-acoes .btn-cancel,
+        .confirmacao-zerar .estado-acoes .btn-danger {
+            font-size: 0.9rem;
+            padding: 8px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <!-- CARREGANDO -->
+        <div id="estado-carregando" class="card estado-card">
+            <i class="fa-solid fa-spinner fa-spin" style="font-size: 1.6rem; color: var(--neon);"></i>
+            <p>Verificando acesso...</p>
+        </div>
+
+        <!-- LOGIN -->
+        <div id="estado-login" class="card estado-card hidden">
+            <img src="logo.png" alt="Ruímners" style="width: 200px; height: auto;">
+            <h2 class="admin-title"><i class="fa-solid fa-lock"></i> ÁREA RESTRITA</h2>
+            <p>Entre com sua conta Google de administrador para acessar o painel.</p>
+            <button id="btn-login" class="btn-confirm"><i class="fa-brands fa-google"></i> ENTRAR COM GOOGLE</button>
+            <a href="index.html" class="admin-link"><i class="fa-solid fa-arrow-left"></i> Voltar ao site</a>
+        </div>
+
+        <!-- ACESSO NEGADO -->
+        <div id="estado-negado" class="card estado-card hidden" style="border-color: #ff4d4d;">
+            <h2 class="admin-title" style="color: #ff4d4d;"><i class="fa-solid fa-ban"></i> ACESSO NEGADO</h2>
+            <p>O e-mail <strong id="negado-email"></strong> não tem permissão de administrador.</p>
+            <div class="estado-acoes">
+                <button id="btn-sair-negado" class="btn-cancel">TROCAR CONTA</button>
+                <a href="index.html" class="btn-confirm" style="flex: 1; text-decoration: none; padding: 12px 0; font-size: 1rem;">VOLTAR AO SITE</a>
+            </div>
+        </div>
+
+        <!-- PAINEL -->
+        <div id="painel" class="hidden" style="display: flex; flex-direction: column; gap: 20px;">
+
+            <header class="admin-header">
+                <a href="index.html"><img src="logo.png" alt="Ruímners"></a>
+                <div class="admin-header-info">
+                    <span><i class="fa-regular fa-user"></i> <span id="admin-email"></span></span>
+                    <a href="index.html" class="admin-link"><i class="fa-solid fa-eye"></i> Ver site</a>
+                    <button id="btn-sair" class="admin-link"><i class="fa-solid fa-right-from-bracket"></i> Sair</button>
+                </div>
+            </header>
+
+            <nav class="admin-tabs">
+                <button class="admin-tab active" data-aba="aba-desafio"><i class="fa-solid fa-bullhorn"></i> DESAFIO</button>
+                <button class="admin-tab" data-aba="aba-localizacao"><i class="fa-solid fa-map-location-dot"></i> LOCALIZAÇÃO</button>
+                <button class="admin-tab" data-aba="aba-checkins"><i class="fa-solid fa-user-group"></i> CHECK-INS</button>
+            </nav>
+
+            <!-- ABA: DESAFIO -->
+            <section id="aba-desafio" class="card admin-aba">
+                <div class="input-group">
+                    <label>Banner do Desafio (opcional)</label>
+                    <div id="edit-banner-dropzone" class="banner-dropzone">
+                        <div id="edit-banner-instrucao" class="banner-dropzone-instrucao">
+                            <i class="fa-solid fa-image"></i>
+                            <span>Arraste uma imagem aqui ou clique para selecionar</span>
+                        </div>
+                        <img id="edit-banner-preview" class="banner-dropzone-preview hidden" alt="Preview do banner">
+                        <button type="button" id="btn-remove-banner" class="banner-remove-btn hidden">
+                            <i class="fa-solid fa-xmark"></i> Remover
+                        </button>
+                    </div>
+                    <input type="file" id="edit-banner-file" accept="image/*" class="hidden">
+                </div>
+                <div class="input-group">
+                    <label for="edit-challenge-text">Texto do Desafio</label>
+                    <textarea id="edit-challenge-text" rows="10"></textarea>
+                    <span class="input-hint">Use 'Enter' para pular linha.</span>
+                </div>
+                <button id="btn-save-challenge" class="btn-confirm">SALVAR DESAFIO</button>
+            </section>
+
+            <!-- ABA: LOCALIZAÇÃO -->
+            <section id="aba-localizacao" class="card admin-aba hidden">
+                <div class="input-group">
+                    <label for="edit-endereco">Endereço Completo</label>
+                    <input type="text" id="edit-endereco" placeholder="Ex: Av. A - Neópolis, Gravataí - RS">
+                </div>
+                <div class="input-group">
+                    <label for="edit-coords">Coordenadas do Mapa (latitude, longitude)</label>
+                    <input type="text" id="edit-coords" placeholder="Ex: -29.915098, -51.026899">
+                    <span class="input-hint">Opcional. Se vazio, o mapa busca pelo endereço.</span>
+                </div>
+                <button id="btn-save-localizacao" class="btn-confirm">SALVAR LOCALIZAÇÃO</button>
+            </section>
+
+            <!-- ABA: CHECK-INS -->
+            <section id="aba-checkins" class="card admin-aba hidden">
+                <div class="contador-box">
+                    <span>ATLETAS CONFIRMADOS</span>
+                    <strong id="contador-atletas">0</strong>
+                </div>
+
+                <button id="btn-zerar-lista" class="btn-danger" style="width: 100%;">
+                    <i class="fa-solid fa-trash-can"></i> ZERAR LISTA DE CHECK-IN
+                </button>
+
+                <div id="confirmacao-zerar-area" class="confirmacao-zerar hidden">
+                    <p>Tem certeza que deseja apagar <strong>TODOS</strong> os atletas confirmados?</p>
+                    <div class="estado-acoes">
+                        <button id="btn-cancel-clear-inline" class="btn-cancel">CANCELAR</button>
+                        <button id="btn-confirm-clear-inline" class="btn-danger">ZERAR TUDO</button>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <!-- FIREBASE SCRIPT -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, deleteDoc, doc, setDoc, getDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+        import { getAuth, signInWithPopup, signOut, onAuthStateChanged, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-storage.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDjoyE7GUNrwvo_5LflUn-1Go4ovHisAKk",
+            authDomain: "ruimners-check-in.firebaseapp.com",
+            projectId: "ruimners-check-in",
+            storageBucket: "ruimners-check-in.firebasestorage.app",
+            messagingSenderId: "365417570993",
+            appId: "1:365417570993:web:e9bcf54620da866ea8f890",
+            measurementId: "G-BYFKQFQ24G"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const storage = getStorage(app);
+        const provider = new GoogleAuthProvider();
+
+        const estadoCarregando = document.getElementById('estado-carregando');
+        const estadoLogin = document.getElementById('estado-login');
+        const estadoNegado = document.getElementById('estado-negado');
+        const painel = document.getElementById('painel');
+        const negadoEmail = document.getElementById('negado-email');
+        const adminEmail = document.getElementById('admin-email');
+
+        const editChallengeText = document.getElementById('edit-challenge-text');
+        const editBannerDropzone = document.getElementById('edit-banner-dropzone');
+        const editBannerInstrucao = document.getElementById('edit-banner-instrucao');
+        const editBannerPreview = document.getElementById('edit-banner-preview');
+        const btnRemoveBanner = document.getElementById('btn-remove-banner');
+        const editBannerFile = document.getElementById('edit-banner-file');
+        const editEndereco = document.getElementById('edit-endereco');
+        const editCoords = document.getElementById('edit-coords');
+        const btnSaveChallenge = document.getElementById('btn-save-challenge');
+        const btnSaveLocalizacao = document.getElementById('btn-save-localizacao');
+        const contadorAtletas = document.getElementById('contador-atletas');
+
+        // ==========================================
+        //  CONTROLE DE ACESSO
+        // ==========================================
+        // Só mostra o painel depois de confirmar que o e-mail logado está na
+        // coleção "admins". A proteção real dos dados fica nas regras do
+        // Firestore/Storage — isto aqui controla apenas o que aparece na tela.
+        function mostrarEstado(elemento) {
+            [estadoCarregando, estadoLogin, estadoNegado, painel].forEach(el => el.classList.add('hidden'));
+            elemento.classList.remove('hidden');
+        }
+
+        let painelIniciado = false;
+
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                mostrarEstado(estadoLogin);
+                return;
+            }
+
+            mostrarEstado(estadoCarregando);
+            try {
+                const adminDoc = await getDoc(doc(db, "admins", user.email));
+                if (adminDoc.exists()) {
+                    adminEmail.textContent = user.email;
+                    mostrarEstado(painel);
+                    if (!painelIniciado) {
+                        painelIniciado = true;
+                        iniciarPainel();
+                    }
+                } else {
+                    negadoEmail.textContent = user.email;
+                    mostrarEstado(estadoNegado);
+                }
+            } catch (error) {
+                console.error("Erro ao verificar permissão:", error);
+                negadoEmail.textContent = user.email;
+                mostrarEstado(estadoNegado);
+            }
+        });
+
+        document.getElementById('btn-login').addEventListener('click', async () => {
+            try {
+                await signInWithPopup(auth, provider);
+            } catch (error) {
+                console.error("Erro no login:", error);
+            }
+        });
+
+        document.getElementById('btn-sair').addEventListener('click', () => signOut(auth));
+        document.getElementById('btn-sair-negado').addEventListener('click', () => signOut(auth));
+
+        // ==========================================
+        //  ABAS
+        // ==========================================
+        const abas = document.querySelectorAll('.admin-tab');
+        abas.forEach(aba => {
+            aba.addEventListener('click', () => {
+                abas.forEach(a => a.classList.toggle('active', a === aba));
+                document.querySelectorAll('.admin-aba').forEach(secao => {
+                    secao.classList.toggle('hidden', secao.id !== aba.dataset.aba);
+                });
+            });
+        });
+
+        // Feedback rápido no botão depois de salvar
+        function mostrarSalvo(botao, textoOriginal) {
+            botao.innerHTML = '<i class="fa-solid fa-check"></i> SALVO!';
+            setTimeout(() => { botao.textContent = textoOriginal; }, 2000);
+        }
+
+        // ==========================================
+        //  DADOS EM TEMPO REAL (só após login de admin)
+        // ==========================================
+        let bannerUrlAtual = "";
+        let camposPreenchidos = false;
+
+        function iniciarPainel() {
+            // Preenche os campos com o que está salvo em desafios/atual.
+            // Só na primeira carga, para não sobrescrever o que o admin está digitando.
+            onSnapshot(doc(db, "desafios", "atual"), (docSnap) => {
+                const dados = docSnap.exists() ? docSnap.data() : {};
+                bannerUrlAtual = dados.bannerUrl || "";
+
+                if (camposPreenchidos) return;
+                camposPreenchidos = true;
+
+                editChallengeText.value = dados.texto || "";
+                editEndereco.value = dados.endereco || "";
+                editCoords.value = (dados.lat != null && dados.lng != null) ? `${dados.lat}, ${dados.lng}` : "";
+
+                if (bannerUrlAtual) {
+                    mostrarPreviewBanner(bannerUrlAtual);
+                } else {
+                    mostrarInstrucaoBanner();
+                }
+            });
+
+            onSnapshot(collection(db, "checkins"), (snapshot) => {
+                contadorAtletas.textContent = snapshot.size;
+            });
+        }
+
+        // ==========================================
+        //  BANNER DO DESAFIO (upload com drag & drop)
+        // ==========================================
+        // Sempre sobrescreve o mesmo arquivo no Storage, então nunca fica
+        // imagem antiga órfã acumulando — o upload novo troca o anterior.
+        const BANNER_STORAGE_PATH = 'desafios/banner-atual.jpg';
+        let arquivoBannerSelecionado = null; // File escolhido, ainda não enviado
+        let bannerMarcadoParaRemover = false;
+
+        function mostrarPreviewBanner(url) {
+            editBannerPreview.src = url;
+            editBannerPreview.classList.remove('hidden');
+            btnRemoveBanner.classList.remove('hidden');
+            editBannerInstrucao.classList.add('hidden');
+        }
+
+        function mostrarInstrucaoBanner() {
+            editBannerPreview.classList.add('hidden');
+            editBannerPreview.removeAttribute('src');
+            btnRemoveBanner.classList.add('hidden');
+            editBannerInstrucao.classList.remove('hidden');
+        }
+
+        function selecionarBanner(file) {
+            if (!file || !file.type.startsWith('image/')) {
+                alert('Selecione um arquivo de imagem válido.');
+                return;
+            }
+            arquivoBannerSelecionado = file;
+            bannerMarcadoParaRemover = false;
+            mostrarPreviewBanner(URL.createObjectURL(file));
+        }
+
+        // Redimensiona/comprime a imagem no navegador antes do upload (fotos de
+        // celular costumam vir grandes, o que deixaria o upload lento no 4G).
+        function resizeImagem(file) {
+            return new Promise((resolve, reject) => {
+                const LADO_MAXIMO = 1600;
+                const imgTemp = new Image();
+                const urlTemp = URL.createObjectURL(file);
+
+                imgTemp.onload = () => {
+                    let { width, height } = imgTemp;
+                    if (width > LADO_MAXIMO || height > LADO_MAXIMO) {
+                        if (width > height) {
+                            height = Math.round(height * (LADO_MAXIMO / width));
+                            width = LADO_MAXIMO;
+                        } else {
+                            width = Math.round(width * (LADO_MAXIMO / height));
+                            height = LADO_MAXIMO;
+                        }
+                    }
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    canvas.getContext('2d').drawImage(imgTemp, 0, 0, width, height);
+                    URL.revokeObjectURL(urlTemp);
+
+                    canvas.toBlob((blob) => {
+                        blob ? resolve(blob) : reject(new Error('Falha ao processar a imagem.'));
+                    }, 'image/jpeg', 0.85);
+                };
+                imgTemp.onerror = () => {
+                    URL.revokeObjectURL(urlTemp);
+                    reject(new Error('Não foi possível ler a imagem selecionada.'));
+                };
+                imgTemp.src = urlTemp;
+            });
+        }
+
+        editBannerDropzone.addEventListener('click', () => editBannerFile.click());
+
+        editBannerFile.addEventListener('change', () => {
+            if (editBannerFile.files && editBannerFile.files[0]) {
+                selecionarBanner(editBannerFile.files[0]);
+            }
+        });
+
+        ['dragover', 'dragenter'].forEach(evento => {
+            editBannerDropzone.addEventListener(evento, (e) => {
+                e.preventDefault();
+                editBannerDropzone.classList.add('dragover');
+            });
+        });
+
+        ['dragleave', 'dragend'].forEach(evento => {
+            editBannerDropzone.addEventListener(evento, () => {
+                editBannerDropzone.classList.remove('dragover');
+            });
+        });
+
+        editBannerDropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            editBannerDropzone.classList.remove('dragover');
+            const file = e.dataTransfer.files && e.dataTransfer.files[0];
+            if (file) selecionarBanner(file);
+        });
+
+        btnRemoveBanner.addEventListener('click', (e) => {
+            e.stopPropagation();
+            arquivoBannerSelecionado = null;
+            bannerMarcadoParaRemover = true;
+            editBannerFile.value = "";
+            mostrarInstrucaoBanner();
+        });
+
+        // Salva o texto do desafio e, se houver, o banner (usa merge para não
+        // apagar endereço/coordenadas já salvos)
+        btnSaveChallenge.addEventListener('click', async () => {
+            const novoTexto = editChallengeText.value.trim();
+            if (novoTexto === "") {
+                alert("O texto do desafio não pode ficar vazio.");
+                return;
+            }
+
+            const textoOriginalBotao = 'SALVAR DESAFIO';
+            btnSaveChallenge.disabled = true;
+            btnSaveChallenge.textContent = arquivoBannerSelecionado ? 'ENVIANDO...' : 'SALVANDO...';
+
+            try {
+                const dadosParaSalvar = { texto: novoTexto };
+                const bannerRef = ref(storage, BANNER_STORAGE_PATH);
+
+                if (arquivoBannerSelecionado) {
+                    const blobRedimensionado = await resizeImagem(arquivoBannerSelecionado);
+                    await uploadBytes(bannerRef, blobRedimensionado);
+                    dadosParaSalvar.bannerUrl = await getDownloadURL(bannerRef);
+                } else if (bannerMarcadoParaRemover) {
+                    try {
+                        await deleteObject(bannerRef);
+                    } catch (e) {
+                        // Ignora se o arquivo já não existir no Storage
+                        if (e.code !== 'storage/object-not-found') throw e;
+                    }
+                    dadosParaSalvar.bannerUrl = null;
+                }
+
+                await setDoc(doc(db, "desafios", "atual"), dadosParaSalvar, { merge: true });
+
+                arquivoBannerSelecionado = null;
+                bannerMarcadoParaRemover = false;
+                editBannerFile.value = "";
+                mostrarSalvo(btnSaveChallenge, textoOriginalBotao);
+            } catch (e) {
+                console.error("Erro ao salvar desafio:", e);
+                alert("Erro ao salvar. Verifique se o Firestore/Storage estão com as permissões corretas.");
+                btnSaveChallenge.textContent = textoOriginalBotao;
+            } finally {
+                btnSaveChallenge.disabled = false;
+            }
+        });
+
+        // ==========================================
+        //  LOCALIZAÇÃO
+        // ==========================================
+        // Salva endereço + coordenadas como campos do mesmo documento
+        // "desafios/atual" (merge para não apagar o texto do desafio)
+        btnSaveLocalizacao.addEventListener('click', async () => {
+            const novoEndereco = editEndereco.value.trim();
+            const coordsStr = editCoords.value.trim();
+
+            let novaLat = null;
+            let novaLng = null;
+            if (coordsStr !== "") {
+                const partes = coordsStr.split(',').map(p => p.trim());
+                novaLat = partes.length === 2 ? parseFloat(partes[0]) : NaN;
+                novaLng = partes.length === 2 ? parseFloat(partes[1]) : NaN;
+
+                if (isNaN(novaLat) || isNaN(novaLng)) {
+                    alert("Coordenadas inválidas. Use o formato: latitude, longitude (ex: -29.915098, -51.026899).");
+                    return;
+                }
+            }
+
+            const textoOriginalBotao = 'SALVAR LOCALIZAÇÃO';
+            btnSaveLocalizacao.disabled = true;
+            btnSaveLocalizacao.textContent = 'SALVANDO...';
+
+            try {
+                await setDoc(doc(db, "desafios", "atual"), {
+                    endereco: novoEndereco,
+                    lat: novaLat,
+                    lng: novaLng
+                }, { merge: true });
+                mostrarSalvo(btnSaveLocalizacao, textoOriginalBotao);
+            } catch (e) {
+                console.error("Erro ao salvar localização:", e);
+                alert("Erro ao salvar localização. Verifique as permissões do Firestore.");
+                btnSaveLocalizacao.textContent = textoOriginalBotao;
+            } finally {
+                btnSaveLocalizacao.disabled = false;
+            }
+        });
+
+        // ==========================================
+        //  ZERAR LISTA DE CHECK-IN
+        // ==========================================
+        const btnZerarLista = document.getElementById('btn-zerar-lista');
+        const confirmacaoZerarArea = document.getElementById('confirmacao-zerar-area');
+        const btnCancelClearInline = document.getElementById('btn-cancel-clear-inline');
+        const btnConfirmClearInline = document.getElementById('btn-confirm-clear-inline');
+
+        function fecharConfirmacaoZerar() {
+            confirmacaoZerarArea.classList.add('hidden');
+            btnZerarLista.disabled = false;
+        }
+
+        btnZerarLista.addEventListener('click', () => {
+            confirmacaoZerarArea.classList.remove('hidden');
+            btnZerarLista.disabled = true; // Evita cliques duplos
+        });
+
+        btnCancelClearInline.addEventListener('click', fecharConfirmacaoZerar);
+
+        btnConfirmClearInline.addEventListener('click', async () => {
+            const textoOriginal = btnConfirmClearInline.innerHTML;
+            btnConfirmClearInline.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> APAGANDO...';
+            btnConfirmClearInline.disabled = true;
+
+            try {
+                const snapshot = await getDocs(collection(db, "checkins"));
+                await Promise.all(snapshot.docs.map(documento => deleteDoc(doc(db, "checkins", documento.id))));
+                fecharConfirmacaoZerar();
+            } catch (erro) {
+                console.error("Erro ao zerar a lista: ", erro);
+                alert("Ocorreu um erro ao tentar limpar a lista.");
+            } finally {
+                btnConfirmClearInline.innerHTML = textoOriginal;
+                btnConfirmClearInline.disabled = false;
+            }
+        });
+    </script>
+</body>
+
+</html>

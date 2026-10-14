@@ -122,6 +122,14 @@
             gap: 15px;
         }
 
+        .challenge-banner {
+            width: 100%;
+            display: block;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            object-fit: cover;
+        }
+
         /* Card de Localização Simplificado */
         .location-card {
             display: flex;
@@ -524,9 +532,9 @@
 
 <body>
 
-    <button id="btn-admin-login" class="admin-top-btn" title="Acesso Restrito ao Admin">
+    <a href="admin.html" class="admin-top-btn" title="Acesso Restrito ao Admin">
         <i class="fa-solid fa-lock"></i>
-    </button>
+    </a>
 
     <div class="container">
 
@@ -539,6 +547,7 @@
             <h2 class="challenge-title">
                 <span><i class="fa-solid fa-bullhorn"></i> PRÓXIMO DESAFIO</span>
             </h2>
+            <img id="challenge-banner" class="challenge-banner hidden" alt="Banner do desafio">
             <div class="challenge-text" id="challenge-display">
                 <p>Carregando desafio...</p>
             </div>
@@ -625,66 +634,10 @@
         </div>
     </div>
 
-    <div id="edit-challenge-modal" class="modal-overlay hidden">
-        <div class="card modal-card" style="border-color: var(--neon); max-width: 400px;">
-            <h3 class="modal-title" style="color: var(--neon);">
-                <i class="fa-solid fa-pen-to-square"></i> EDITAR DESAFIO
-            </h3>
-            <div class="input-group" style="text-align: left;">
-                <label>Texto do Desafio (Use 'Enter' para pular linha)</label>
-                <textarea id="edit-challenge-text" rows="8"
-                    style="width: 100%; background-color: #1A1A1A; border: 1px solid #333; border-radius: 8px; color: white; padding: 10px; font-family: 'Inter', sans-serif; resize: none;"></textarea>
-            </div>
-            <div class="modal-actions" style="margin-top: 20px;">
-                <button id="btn-cancel-edit" class="btn-cancel">CANCELAR</button>
-                <button id="btn-save-challenge" class="btn-confirm" style="flex: 1; padding: 12px 0;">SALVAR</button>
-            </div>
-
-            <div style="border-top: 1px solid var(--border-color); margin: 24px 0 20px;"></div>
-
-            <h4 style="color: var(--text-muted); font-family: 'Oswald', sans-serif; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; margin-bottom: 16px; text-align: left;">
-                <i class="fa-solid fa-map-location-dot"></i> LOCALIZAÇÃO (OPCIONAL)
-            </h4>
-            <div class="input-group" style="text-align: left;">
-                <label>Endereço Completo</label>
-                <input type="text" id="edit-endereco" placeholder="Ex: Av. A - Neópolis, Gravataí - RS"
-                    style="width: 100%; background-color: #1A1A1A; border: 1px solid #333; border-radius: 8px; color: white; padding: 10px; font-family: 'Inter', sans-serif;">
-            </div>
-            <div class="input-group" style="text-align: left;">
-                <label>Coordenadas do Mapa (latitude, longitude)</label>
-                <input type="text" id="edit-coords" placeholder="Ex: -29.915098, -51.026899"
-                    style="width: 100%; background-color: #1A1A1A; border: 1px solid #333; border-radius: 8px; color: white; padding: 10px; font-family: 'Inter', sans-serif;">
-            </div>
-            <button id="btn-save-localizacao" class="btn-confirm"
-                style="width: 100%; margin-bottom: 20px; padding: 12px 0;">SALVAR LOCALIZAÇÃO</button>
-
-            <button id="btn-zerar-lista" class="btn-danger"
-                style="width: 100%; margin-top: 15px; padding: 12px 0; display: flex; justify-content: center; align-items: center; gap: 10px;">
-                <i class="fa-solid fa-trash-can"></i> ZERAR LISTA DE CHECK-IN
-            </button>
-
-            <div id="confirmacao-zerar-area" class="hidden"
-                style="margin-top: 15px; background-color: #1a0000; border: 1px solid #ff4d4d; border-radius: 8px; padding: 15px;">
-                <p style="color: #ff4d4d; font-size: 0.95rem; margin-bottom: 15px; line-height: 1.4;">
-                    Tem certeza que deseja apagar <strong>TODOS</strong> os atletas confirmados?
-                </p>
-                <div style="display: flex; gap: 15px;">
-                    <button id="btn-cancel-clear-inline" class="btn-cancel"
-                        style="font-size: 0.9rem; padding: 8px 0;">CANCELAR</button>
-                    <button id="btn-confirm-clear-inline" class="btn-danger"
-                        style="font-size: 0.9rem; padding: 8px 0;">ZERAR TUDO</button>
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-
     <!-- FIREBASE SCRIPT -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy, setDoc, getDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDjoyE7GUNrwvo_5LflUn-1Go4ovHisAKk",
@@ -698,29 +651,19 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const auth = getAuth(app);
-        const provider = new GoogleAuthProvider();
 
         const inputAtleta = document.getElementById('atleta-input');
         const btnConfirmar = document.getElementById('btn-confirmar');
         const listaCheckin = document.getElementById('lista-checkin');
         const contadorAtletas = document.getElementById('contador-atletas');
         const challengeDisplay = document.getElementById('challenge-display');
+        const challengeBanner = document.getElementById('challenge-banner');
 
         const deleteModal = document.getElementById('delete-modal');
         const modalAthleteName = document.getElementById('modal-athlete-name');
         const btnCancelDelete = document.getElementById('btn-cancel-delete');
         const btnConfirmDelete = document.getElementById('btn-confirm-delete');
         let idParaDeletar = null;
-
-        const btnAdminLogin = document.getElementById('btn-admin-login');
-        const editChallengeModal = document.getElementById('edit-challenge-modal');
-        const editChallengeText = document.getElementById('edit-challenge-text');
-        const editEndereco = document.getElementById('edit-endereco');
-        const editCoords = document.getElementById('edit-coords');
-        const btnCancelEdit = document.getElementById('btn-cancel-edit');
-        const btnSaveChallenge = document.getElementById('btn-save-challenge');
-        const btnSaveLocalizacao = document.getElementById('btn-save-localizacao');
 
         const mapaIframe = document.getElementById('mapa-iframe');
         const enderecoDisplay = document.getElementById('endereco-display');
@@ -812,6 +755,7 @@
 
         // DESAFIO + LOCALIZAÇÃO EM TEMPO REAL (mesmo documento: desafios/atual)
         let textoAtualDesafio = "";
+        let bannerUrlAtual = "";
         let enderecoAtual = "";
         let latAtual = "";
         let lngAtual = "";
@@ -822,6 +766,15 @@
             challengeDisplay.innerHTML = textoAtualDesafio
                 ? textoAtualDesafio.split('\n').map(linha => `<p>${linha}</p>`).join('')
                 : "<p>Nenhum desafio cadastrado ainda.</p>";
+
+            bannerUrlAtual = dados.bannerUrl || "";
+            if (bannerUrlAtual) {
+                challengeBanner.src = bannerUrlAtual;
+                challengeBanner.classList.remove('hidden');
+            } else {
+                challengeBanner.removeAttribute('src');
+                challengeBanner.classList.add('hidden');
+            }
 
             // Enquanto o admin não salvar uma localização própria, mantém o
             // endereço/coordenadas padrão para não deixar o mapa em branco.
@@ -837,147 +790,6 @@
                 ? `${latAtual},${lngAtual}`
                 : encodeURIComponent(enderecoAtual);
             mapaIframe.src = `https://maps.google.com/maps?q=${consultaMapa}&z=16&output=embed`;
-        });
-
-        // LOGIN E PERMISSÃO DO ADMIN
-        btnAdminLogin.addEventListener('click', async () => {
-            let user = auth.currentUser;
-
-            if (!user) {
-                try {
-                    const result = await signInWithPopup(auth, provider);
-                    user = result.user;
-                } catch (error) {
-                    console.error("Erro no login:", error);
-                    return;
-                }
-            }
-
-            try {
-                const adminDoc = await getDoc(doc(db, "admins", user.email));
-                if (adminDoc.exists()) {
-                    abrirModalAdmin();
-                } else {
-                    alert(`Acesso Negado: O e-mail ${user.email} não tem permissão de administrador.`);
-                }
-            } catch (error) {
-                console.error("Erro ao verificar permissão:", error);
-                alert("Erro ao verificar as permissões no banco de dados.");
-            }
-        });
-
-        function abrirModalAdmin() {
-            editChallengeText.value = textoAtualDesafio;
-            editEndereco.value = enderecoAtual;
-            editCoords.value = (latAtual !== "" && lngAtual !== "") ? `${latAtual}, ${lngAtual}` : "";
-            editChallengeModal.classList.remove('hidden');
-        }
-
-        btnCancelEdit.addEventListener('click', () => {
-            editChallengeModal.classList.add('hidden');
-        });
-
-        // Salva só o texto do desafio (usa merge para não apagar endereço/coordenadas já salvos)
-        btnSaveChallenge.addEventListener('click', async () => {
-            const novoTexto = editChallengeText.value.trim();
-            if (novoTexto === "") return;
-
-            try {
-                await setDoc(doc(db, "desafios", "atual"), { texto: novoTexto }, { merge: true });
-                editChallengeModal.classList.add('hidden');
-            } catch (e) {
-                console.error("Erro ao salvar desafio:", e);
-                alert("Erro ao salvar. Verifique se o Firestore está em Modo Teste.");
-            }
-        });
-
-        // Salva só a localização (endereço + coordenadas), como campos do mesmo
-        // documento "desafios/atual" (merge para não apagar o texto do desafio)
-        btnSaveLocalizacao.addEventListener('click', async () => {
-            const novoEndereco = editEndereco.value.trim();
-            const coordsStr = editCoords.value.trim();
-
-            let novaLat = null;
-            let novaLng = null;
-            if (coordsStr !== "") {
-                const partes = coordsStr.split(',').map(p => p.trim());
-                novaLat = partes.length === 2 ? parseFloat(partes[0]) : NaN;
-                novaLng = partes.length === 2 ? parseFloat(partes[1]) : NaN;
-
-                if (isNaN(novaLat) || isNaN(novaLng)) {
-                    alert("Coordenadas inválidas. Use o formato: latitude, longitude (ex: -29.915098, -51.026899).");
-                    return;
-                }
-            }
-
-            try {
-                await setDoc(doc(db, "desafios", "atual"), {
-                    endereco: novoEndereco,
-                    lat: novaLat,
-                    lng: novaLng
-                }, { merge: true });
-                editChallengeModal.classList.add('hidden');
-            } catch (e) {
-                console.error("Erro ao salvar localização:", e);
-                alert("Erro ao salvar localização. Verifique se o Firestore está em Modo Teste.");
-            }
-        });
-
-        // ==========================================
-        //  ZERAR LISTA DE CHECK-IN INLINE
-        // ==========================================
-        const btnZerarLista = document.getElementById('btn-zerar-lista');
-        const confirmacaoZerarArea = document.getElementById('confirmacao-zerar-area');
-        const btnCancelClearInline = document.getElementById('btn-cancel-clear-inline');
-        const btnConfirmClearInline = document.getElementById('btn-confirm-clear-inline');
-
-        // 1. Ao clicar no botão principal de zerar
-        btnZerarLista.addEventListener('click', () => {
-            confirmacaoZerarArea.classList.remove('hidden'); // Revela a caixa de confirmação
-            btnZerarLista.disabled = true; // Desabilita o botão para evitar cliques duplos
-            btnZerarLista.style.opacity = '0.5';
-        });
-
-        // 2. Se clicar em cancelar a ação
-        btnCancelClearInline.addEventListener('click', () => {
-            confirmacaoZerarArea.classList.add('hidden'); // Esconde a caixa
-            btnZerarLista.disabled = false; // Reativa o botão principal
-            btnZerarLista.style.opacity = '1';
-        });
-
-        // 3. Se confirmar a exclusão de tudo
-        btnConfirmClearInline.addEventListener('click', async () => {
-            // Efeito de carregamento no botão
-            const textoOriginal = btnConfirmClearInline.innerHTML;
-            btnConfirmClearInline.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> APAGANDO...';
-            btnConfirmClearInline.disabled = true;
-
-            try {
-                // Busca todos os documentos
-                const checkinsRef = collection(db, "checkins");
-                const snapshot = await getDocs(checkinsRef);
-
-                // Dispara a deleção de todos de uma vez
-                const promessasDelecao = snapshot.docs.map(documento => {
-                    return deleteDoc(doc(db, "checkins", documento.id));
-                });
-
-                await Promise.all(promessasDelecao);
-
-                // Volta o painel ao estado original e o fecha
-                confirmacaoZerarArea.classList.add('hidden');
-                btnConfirmClearInline.innerHTML = textoOriginal;
-                btnConfirmClearInline.disabled = false;
-                btnZerarLista.disabled = false;
-                btnZerarLista.style.opacity = '1';
-                editChallengeModal.classList.add('hidden'); // Opcional: fecha a janela de edição inteira
-
-            } catch (erro) {
-                console.error("Erro ao zerar a lista: ", erro);
-                alert("Ocorreu um erro ao tentar limpar a lista.");
-                btnConfirmClearInline.innerHTML = textoOriginal;
-                btnConfirmClearInline.disabled = false;
-            }
         });
 
         // ==========================================
