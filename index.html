@@ -637,7 +637,8 @@
     <!-- FIREBASE SCRIPT -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy, setDoc, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+        import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-analytics.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDjoyE7GUNrwvo_5LflUn-1Go4ovHisAKk",
@@ -651,6 +652,66 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+
+        // Google Analytics do Firebase (relatórios no Firebase Console).
+        // Bloqueadores de anúncio podem impedir o carregamento — por isso o try.
+        let analytics = null;
+        try { analytics = getAnalytics(app); } catch (e) { console.warn("Analytics indisponível:", e); }
+
+        // ==========================================
+        //  ESTATÍSTICAS DE ACESSO (aba ACESSOS do admin)
+        // ==========================================
+        // Nada aqui pode quebrar o site: todo erro é engolido em silêncio.
+        function lerStorage(storage, chave) {
+            try { return storage.getItem(chave); } catch (e) { return null; }
+        }
+        function gravarStorage(storage, chave, valor) {
+            try { storage.setItem(chave, valor); } catch (e) { /* storage bloqueado */ }
+        }
+
+        const hoje = new Date().toLocaleDateString('sv-SE'); // AAAA-MM-DD no fuso local
+
+        // Visita: conta uma vez por sessão do navegador (recarregar não soma de novo).
+        // Visitante único: conta uma vez por dia por navegador.
+        async function registrarVisita() {
+            const novaVisita = !lerStorage(sessionStorage, 'visitaContada');
+            const novoVisitante = lerStorage(localStorage, 'ultimoDiaVisitado') !== hoje;
+            if (!novaVisita && !novoVisitante) return;
+
+            try {
+                const dadosDia = {};
+                if (novaVisita) dadosDia.visitas = increment(1);
+                if (novoVisitante) dadosDia.visitantes = increment(1);
+                await setDoc(doc(db, "estatisticas_dias", hoje), dadosDia, { merge: true });
+                if (novaVisita) {
+                    await setDoc(doc(db, "estatisticas", "geral"), { totalVisitas: increment(1) }, { merge: true });
+                }
+                gravarStorage(sessionStorage, 'visitaContada', '1');
+                gravarStorage(localStorage, 'ultimoDiaVisitado', hoje);
+            } catch (e) {
+                console.warn("Não foi possível registrar a visita:", e);
+            }
+        }
+
+        // Online agora: cada aba aberta mantém um documento em "online" com um
+        // ping a cada minuto. O admin conta quem pingou nos últimos 2 minutos.
+        let idSessao = lerStorage(sessionStorage, 'idSessao');
+        if (!idSessao) {
+            idSessao = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(36).slice(2));
+            gravarStorage(sessionStorage, 'idSessao', idSessao);
+        }
+        const docOnline = doc(db, "online", idSessao);
+
+        function pingOnline() {
+            if (document.visibilityState !== 'visible') return;
+            setDoc(docOnline, { ultimoPing: serverTimestamp() }).catch(() => {});
+        }
+
+        registrarVisita();
+        pingOnline();
+        setInterval(pingOnline, 60 * 1000);
+        document.addEventListener('visibilitychange', pingOnline);
+        window.addEventListener('pagehide', () => { deleteDoc(docOnline).catch(() => {}); });
 
         const inputAtleta = document.getElementById('atleta-input');
         const btnConfirmar = document.getElementById('btn-confirmar');
@@ -691,6 +752,7 @@
                     hora: horaFormatada,
                     timestamp: Date.now()
                 });
+                if (analytics) logEvent(analytics, 'checkin');
                 inputAtleta.value = "";
             } catch (e) {
                 console.error("Erro ao adicionar documento: ", e);

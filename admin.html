@@ -372,6 +372,32 @@
             font-size: 1.8rem;
         }
 
+        .dias-lista {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .dias-lista-titulo {
+            color: var(--text-muted);
+            font-family: 'Oswald', sans-serif;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .dia-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 12px;
+            background-color: #1A1A1A;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .dia-item small {
+            color: var(--text-muted);
+        }
+
         .confirmacao-zerar {
             margin-top: 15px;
             background-color: #1a0000;
@@ -439,6 +465,7 @@
                 <button class="admin-tab active" data-aba="aba-desafio"><i class="fa-solid fa-bullhorn"></i> DESAFIO</button>
                 <button class="admin-tab" data-aba="aba-localizacao"><i class="fa-solid fa-map-location-dot"></i> LOCALIZAÇÃO</button>
                 <button class="admin-tab" data-aba="aba-checkins"><i class="fa-solid fa-user-group"></i> CHECK-INS</button>
+                <button class="admin-tab" data-aba="aba-acessos"><i class="fa-solid fa-chart-line"></i> ACESSOS</button>
             </nav>
 
             <!-- ABA: DESAFIO -->
@@ -499,13 +526,39 @@
                 </div>
             </section>
 
+            <!-- ABA: ACESSOS -->
+            <section id="aba-acessos" class="card admin-aba hidden">
+                <div class="contador-box">
+                    <span>ONLINE AGORA</span>
+                    <strong id="acessos-online">0</strong>
+                </div>
+                <div class="contador-box">
+                    <span>VISITAS HOJE</span>
+                    <strong id="acessos-visitas-hoje">0</strong>
+                </div>
+                <div class="contador-box">
+                    <span>VISITANTES ÚNICOS HOJE</span>
+                    <strong id="acessos-visitantes-hoje">0</strong>
+                </div>
+                <div class="contador-box">
+                    <span>TOTAL DE VISITAS</span>
+                    <strong id="acessos-total">0</strong>
+                </div>
+
+                <div class="dias-lista">
+                    <span class="dias-lista-titulo">ÚLTIMOS 7 DIAS</span>
+                    <div id="acessos-dias"></div>
+                </div>
+                <span class="input-hint">Relatórios completos (origem, cidade, dispositivo) no Firebase Console → Analytics.</span>
+            </section>
+
         </div>
     </div>
 
     <!-- FIREBASE SCRIPT -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, deleteDoc, doc, setDoc, getDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, deleteDoc, doc, setDoc, getDoc, getDocs, query, where, orderBy, limit, Timestamp, documentId } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
         import { getAuth, signInWithPopup, signOut, onAuthStateChanged, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
         import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-storage.js";
 
@@ -644,6 +697,71 @@
             onSnapshot(collection(db, "checkins"), (snapshot) => {
                 contadorAtletas.textContent = snapshot.size;
             });
+
+            iniciarAcessos();
+        }
+
+        // ==========================================
+        //  ACESSOS (gravados pelo index.html)
+        // ==========================================
+        function iniciarAcessos() {
+            const hoje = new Date().toLocaleDateString('sv-SE'); // AAAA-MM-DD no fuso local
+
+            onSnapshot(doc(db, "estatisticas", "geral"), (docSnap) => {
+                document.getElementById('acessos-total').textContent = docSnap.data()?.totalVisitas || 0;
+            });
+
+            onSnapshot(doc(db, "estatisticas_dias", hoje), (docSnap) => {
+                const dados = docSnap.data() || {};
+                document.getElementById('acessos-visitas-hoje').textContent = dados.visitas || 0;
+                document.getElementById('acessos-visitantes-hoje').textContent = dados.visitantes || 0;
+            });
+
+            // Últimos 7 dias (o id do documento é a data, então ordenar pelo id funciona)
+            const qDias = query(collection(db, "estatisticas_dias"), orderBy(documentId(), "desc"), limit(7));
+            onSnapshot(qDias, (snapshot) => {
+                const listaDias = document.getElementById('acessos-dias');
+                listaDias.innerHTML = "";
+                if (snapshot.empty) {
+                    listaDias.innerHTML = '<div class="dia-item"><small>Nenhum acesso registrado ainda.</small></div>';
+                    return;
+                }
+                snapshot.forEach((docSnap) => {
+                    const dados = docSnap.data();
+                    const [ano, mes, dia] = docSnap.id.split('-');
+                    const item = document.createElement('div');
+                    item.className = 'dia-item';
+                    item.innerHTML = `<span>${dia}/${mes}/${ano}</span><small>${dados.visitas || 0} visitas · ${dados.visitantes || 0} visitantes</small>`;
+                    listaDias.appendChild(item);
+                });
+            });
+
+            // Online agora: quem deu ping nos últimos 2 minutos. O corte de
+            // tempo é fixo na query, então ela é refeita a cada minuto.
+            let pararOnline = null;
+            function assinarOnline() {
+                if (pararOnline) pararOnline();
+                const corte = Timestamp.fromMillis(Date.now() - 2 * 60 * 1000);
+                pararOnline = onSnapshot(query(collection(db, "online"), where("ultimoPing", ">", corte)), (snapshot) => {
+                    document.getElementById('acessos-online').textContent = snapshot.size;
+                });
+            }
+            assinarOnline();
+            setInterval(assinarOnline, 60 * 1000);
+
+            limparSessoesAntigas();
+        }
+
+        // Abas fechadas no celular nem sempre avisam a saída; apaga sessões
+        // sem ping há mais de 10 minutos para a coleção não crescer sem fim.
+        async function limparSessoesAntigas() {
+            try {
+                const corte = Timestamp.fromMillis(Date.now() - 10 * 60 * 1000);
+                const antigas = await getDocs(query(collection(db, "online"), where("ultimoPing", "<", corte)));
+                await Promise.all(antigas.docs.map(documento => deleteDoc(documento.ref)));
+            } catch (erro) {
+                console.warn("Não foi possível limpar sessões antigas:", erro);
+            }
         }
 
         // ==========================================
